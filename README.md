@@ -35,7 +35,7 @@ conda activate gold-project
 
 pip install pandas numpy scikit-learn streamlit
 
-streamlit run app.py
+**streamlit run app.py**
 
 🛠️ Model Optimization Note
 Originally, the trained model file was over 240MB. To ensure the project was suitable for GitHub and web deployment, the model was optimized using tree pruning (limiting max_depth to 10).
