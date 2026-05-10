@@ -1,43 +1,31 @@
-# 📈 Gold Price Predictor
+# 📈 Gold Price Intelligence Dashboard
+### Real-Time Financial Forecasting with Random Forest Regression
 
-A machine learning web application that predicts gold closing prices based on market features (Open, High, Low, and Volume). This project uses a **Random Forest Regressor** and is served via a **Streamlit** web interface.
-
-## 🚀 Project Overview
-This project was developed to provide a lightweight yet accurate tool for predicting gold market trends. 
-- **Model Accuracy:** ~90% (R² Score)
-- **Model Size:** 12MB (Optimized for fast deployment)
-- **Technologies:** Python, Scikit-Learn, Pandas, Streamlit
+This project is a 3rd-year IT academic project developed to predict Gold prices by analyzing inter-market relationships. Unlike traditional static models, this dashboard utilizes a live data pipeline to fetch real-market indicators and perform real-time inference.
 
 ---
 
-## 💻 Instructions for Use (New PC Setup)
+## 🚀 Key Innovations
+- **Serverless Architecture:** The project is "stateless"—it fetches historical data for training and live data for prediction directly via the **Yahoo Finance API**, eliminating the need for local CSV storage.
+- **Uncertainty Quantification:** Uses the variance between individual trees in the **Random Forest Regressor** to calculate and visualize a 95% Confidence Interval (Prediction Intervals).
+- **Macro-Economic Scenario Engine:** Allows users to perform "What-If" analysis by simulating market shocks (e.g., Financial Crisis, Bull Markets) to see how the model reacts to volatility.
 
-Follow these steps to get the project running on a new machine.
+## 🛠️ The "Inter-Market" Features
+The model doesn't just look at Gold; it analyzes five critical market drivers:
+1. **SPX (S&P 500):** General market health.
+2. **VIX (Volatility Index):** The market's "Fear Gauge."
+3. **USO (United States Oil Fund):** Commodity price trends.
+4. **SLV (iShares Silver Trust):** Precious metal correlation.
+5. **EUR/USD:** Strength of the US Dollar against the Euro.
 
-### 1. Prerequisites
-Ensure you have **Python 3.8+** or **Anaconda** installed on your system.
+## 📦 Tech Stack
+- **Language:** Python 3.10+
+- **Machine Learning:** Scikit-Learn (Random Forest)
+- **Dashboard:** Streamlit
+- **Visualization:** Plotly (Interactive Charts)
+- **Data Source:** `yfinance` (Yahoo Finance API)
 
-### 2. Clone the Repository
-Open your terminal (or Git Bash) and run:
-
-git clone [https://github.com/Sonal-Github1/Gold-Price-Prediction.git](https://github.com/Sonal-Github1/Gold-Price-Prediction.git)
-cd Gold-Price-Prediction
-
-3. Set Up a Virtual Environment (Recommended)
-
-# Using Python
-python -m venv env
-.\env\Scripts\activate
-
-# OR Using Anaconda
-conda create -n gold-project python=3.9
-conda activate gold-project
-
-pip install pandas numpy scikit-learn streamlit
-
-**streamlit run app.py**
-
-🛠️ Model Optimization Note
-Originally, the trained model file was over 240MB. To ensure the project was suitable for GitHub and web deployment, the model was optimized using tree pruning (limiting max_depth to 10).
-
-Result: File size reduced by 95% while maintaining a high accuracy of 90%.
+## 🔧 Installation & Local Setup
+1. Clone the repository:
+   ```bash
+   git clone [https://github.com/Sonal-Github1/Gold-Price-Prediction.git](https://github.com/Sonal-Github1/Gold-Price-Prediction.git)
