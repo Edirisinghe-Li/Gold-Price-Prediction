@@ -1,6 +1,6 @@
-# Gold Price Prediction Dashboard
+## Gold Price Prediction Dashboard
 
-A machine learning project that predicts gold price using market indicators and serves results in an interactive Streamlit dashboard.Also this is a 3rd year project for the subject Artificial Neural Network (COU5300) in the BSc in Information Technology degree program at The Open University of Sri Lanka.
+A machine learning project that predicts gold price using market indicators and serves results in an interactive Streamlit dashboard.Also this is a 3rd year project for the subject Artificial Neural Network (COU5300) in the BSc in Information Technology degree program at The Open University of Sri Lanka. 
 
 ## Project Overview
 
@@ -166,4 +166,4 @@ The app computes:
 
 ## License
 
-No license file is currently included. Add a LICENSE file if you plan to distribute this project publicly.
+No license file is currently included.
