@@ -144,6 +144,26 @@ def fetch_last_5_days_history():
     except:
         return pd.DataFrame()
 
+# FIXED: Fetch last 5 days gold price history
+@st.cache_data(ttl=300)
+def fetch_gold_price_history():
+    """Fetch last 5 days of gold price data for table display"""
+    try:
+        # Download gold futures data
+        gold_data = yf.download('GC=F', period="5d", interval="1d", progress=False)
+        
+        # Extract Close price and convert to DataFrame
+        if isinstance(gold_data, pd.DataFrame):
+            gold_prices = gold_data[['Close']].copy()
+            gold_prices.columns = ['Gold Price']
+        else:
+            gold_prices = pd.DataFrame({'Gold Price': gold_data['Close']})
+        
+        return gold_prices
+    except Exception as e:
+        st.error(f"Error fetching gold prices: {e}")
+        return pd.DataFrame()
+
 # Load Resources
 model = load_model()
 try:
@@ -278,6 +298,26 @@ with st.container(border=True):
         )
     else:
         st.info("No historical data available")
+
+# FIXED: Last 5 Days Gold Price Table
+with st.container(border=True):
+    st.subheader("🏆 Last 5 Days Gold Price")
+    gold_data = fetch_gold_price_history()
+    
+    if not gold_data.empty:
+        # Format the dataframe for display
+        display_gold = gold_data.copy()
+        display_gold.index = display_gold.index.strftime('%Y-%m-%d')
+        display_gold = display_gold.round(2)
+        
+        # Display as table
+        st.dataframe(
+            display_gold,
+            use_container_width=True,
+            height=250
+        )
+    else:
+        st.info("No gold price data available")
 
 # Footer Utilities
 st.divider()
