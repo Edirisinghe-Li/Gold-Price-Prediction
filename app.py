@@ -4,7 +4,8 @@ import numpy as np
 import pickle
 import yfinance as yf
 import plotly.graph_objects as go
-from datetime import datetime
+from datetime import datetime, time
+import pytz
 
 # 1. CONFIGURATION & UI OPTIMIZATION 
 st.set_page_config(page_title="Gold Intelligence", layout="wide", initial_sidebar_state="expanded")
@@ -33,7 +34,64 @@ def load_model():
     with open('gold_model.pkl', 'rb') as f:
         return pickle.load(f)
 
-@st.cache_data(ttl=3600)
+# FIXED: Detect market open/close using yfinance data and market hours
+def check_market_status(data, data_date):
+    """
+    Determine if US equity market is currently open using:
+    1. Data availability (today's close exists)
+    2. Current time vs market hours (9:30 AM - 4:00 PM EST)
+    3. Weekend/holiday detection
+    """
+    # US market hours: 9:30 AM - 4:00 PM EST
+    market_open = time(9, 30)
+    market_close = time(16, 0)
+    
+    # Get current time in EST
+    est = pytz.timezone('US/Eastern')
+    now_est = datetime.now(est)
+    current_time = now_est.time()
+    
+    today = datetime.now().date()
+    data_date_only = data_date.date()
+    
+    # Check if weekend
+    if now_est.weekday() >= 5:  # Saturday=5, Sunday=6
+        return True, "Market is closed (weekend)"
+    
+    # US market holidays for 2024-2026
+    us_holidays = {
+        (1, 1),    # New Year
+        (1, 15),   # MLK Day
+        (2, 19),   # Presidents' Day
+        (3, 29),   # Good Friday
+        (5, 27),   # Memorial Day
+        (6, 19),   # Juneteenth
+        (7, 4),    # Independence Day
+        (9, 2),    # Labor Day
+        (11, 28),  # Thanksgiving
+        (12, 25),  # Christmas
+    }
+    
+    if (now_est.month, now_est.day) in us_holidays:
+        return True, "Market is closed (holiday)"
+    
+    # Check if today's data is available
+    if data_date_only == today:
+        # Today's data exists - market was open today
+        if current_time >= market_close:
+            return False, f"Market closed at 4:00 PM EST (data as of {data_date_only})"
+        elif current_time < market_open:
+            return True, f"Market opens at 9:30 AM EST"
+        else:
+            return False, f"Market is currently open"
+    else:
+        # Today's data NOT available
+        if current_time >= market_close or current_time < market_open:
+            return True, f"Market is closed (latest data: {data_date_only})"
+        else:
+            return True, f"Market data not yet available (latest: {data_date_only})"
+
+@st.cache_data(ttl=300)
 def fetch_market_data():
     ticker_map = {
         '^GSPC': 'SPX',
@@ -42,23 +100,39 @@ def fetch_market_data():
         'SLV': 'SLV',
         'EURUSD=X': 'EURUSD'
     }
-    # Fetch data and ensure column names are clean
-    data = yf.download(list(ticker_map.keys()), period="5d", interval="1d")['Close']
+    # Fetch data
+    data = yf.download(list(ticker_map.keys()), period="5d", interval="1d", progress=False)['Close']
     
     # Handle potential MultiIndex from yfinance
     if isinstance(data.columns, pd.MultiIndex):
         data.columns = data.columns.get_level_values(1)
         
     data = data.rename(columns=ticker_map)
-    return data.iloc[-1]
+    
+    # FIXED: If today's data is NaN, use most recent available row
+    latest_row = data.iloc[-1]
+    data_date = data.index[-1]
+    
+    if latest_row.isnull().any():
+        for i in range(len(data) - 1, -1, -1):
+            if not data.iloc[i].isnull().any():
+                latest_row = data.iloc[i]
+                data_date = data.index[i]
+                break
+    
+    return latest_row, data_date
 
 # Load Resources
 model = load_model()
 try:
-    market_live = fetch_market_data()
+    market_live, data_date = fetch_market_data()
+    is_closed, market_msg = check_market_status(market_live, data_date)
 except Exception as e:
     st.error(f"Live Data Connection Failed. Using static baseline. Error: {e}")
     market_live = pd.Series({'SPX': 5100.0, 'VIX': 15.0, 'USO': 75.0, 'SLV': 24.0, 'EURUSD': 1.08})
+    data_date = datetime.now()
+    is_closed = True
+    market_msg = "Data unavailable - using baseline"
 
 # 3. SIDEBAR CONTROLS
 st.sidebar.header("🕹️ Scenario Control Center")
@@ -104,6 +178,12 @@ upper_ci = np.percentile(all_tree_preds, 97.5)
 
 # 5. DASHBOARD LAYOUT
 st.title("📈 Gold Price Intelligence Dashboard")
+
+# FIXED: Display market status banner
+if is_closed:
+    st.warning(f"⏸️ {market_msg}")
+else:
+    st.success(f"✅ {market_msg}")
 
 # Top Metric Row
 with st.container(border=True):
