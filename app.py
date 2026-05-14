@@ -6,7 +6,7 @@ import yfinance as yf
 import plotly.graph_objects as go
 from datetime import datetime
 
-# --- 1. CONFIGURATION & UI OPTIMIZATION ---
+# 1. CONFIGURATION & UI OPTIMIZATION 
 st.set_page_config(page_title="Gold Intelligence", layout="wide", initial_sidebar_state="expanded")
 
 # Custom CSS for "Single Screen" fit
@@ -27,7 +27,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. MODEL & DATA CORE ---
+# 2. MODEL & DATA CORE
 @st.cache_resource
 def load_model():
     with open('gold_model.pkl', 'rb') as f:
@@ -60,7 +60,7 @@ except Exception as e:
     st.error(f"Live Data Connection Failed. Using static baseline. Error: {e}")
     market_live = pd.Series({'SPX': 5100.0, 'VIX': 15.0, 'USO': 75.0, 'SLV': 24.0, 'EURUSD': 1.08})
 
-# --- 3. SIDEBAR CONTROLS ---
+# 3. SIDEBAR CONTROLS
 st.sidebar.header("🕹️ Scenario Control Center")
 
 scenario = st.sidebar.selectbox(
@@ -85,7 +85,7 @@ else:
     vix_input = vix_manual
     spx_input = market_live['SPX']
 
-# --- 4. PREDICTION ENGINE ---
+# 4. PREDICTION ENGINE 
 # Prepare features in exact order used during training
 input_features = np.array([[
     spx_input, 
@@ -102,7 +102,7 @@ all_tree_preds = np.array([tree.predict(input_features) for tree in model.estima
 lower_ci = np.percentile(all_tree_preds, 2.5)
 upper_ci = np.percentile(all_tree_preds, 97.5)
 
-# --- 5. DASHBOARD LAYOUT ---
+# 5. DASHBOARD LAYOUT
 st.title("📈 Gold Price Intelligence Dashboard")
 
 # Top Metric Row
