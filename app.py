@@ -122,6 +122,28 @@ def fetch_market_data():
     
     return latest_row, data_date
 
+# FIXED: Fetch last 5 days history for table display
+@st.cache_data(ttl=300)
+def fetch_last_5_days_history():
+    """Fetch last 5 days of market data for table display"""
+    ticker_map = {
+        '^GSPC': 'SPX',
+        '^VIX': 'VIX',
+        'USO': 'USO',
+        'SLV': 'SLV',
+        'EURUSD=X': 'EURUSD'
+    }
+    try:
+        data = yf.download(list(ticker_map.keys()), period="5d", interval="1d", progress=False)['Close']
+        
+        if isinstance(data.columns, pd.MultiIndex):
+            data.columns = data.columns.get_level_values(1)
+        
+        data = data.rename(columns=ticker_map)
+        return data
+    except:
+        return pd.DataFrame()
+
 # Load Resources
 model = load_model()
 try:
@@ -234,6 +256,28 @@ with c2:
             height=350
         )
         st.plotly_chart(fig_imp, use_container_width=True)
+
+st.divider()
+
+# FIXED: Last 5 Days Market Data Table
+with st.container(border=True):
+    st.subheader("📊 Last 5 Days Market Data")
+    history_data = fetch_last_5_days_history()
+    
+    if not history_data.empty:
+        # Format the dataframe for display
+        display_df = history_data.copy()
+        display_df.index = display_df.index.strftime('%Y-%m-%d')
+        display_df = display_df.round(2)
+        
+        # Display as table
+        st.dataframe(
+            display_df,
+            use_container_width=True,
+            height=250
+        )
+    else:
+        st.info("No historical data available")
 
 # Footer Utilities
 st.divider()
