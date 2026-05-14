@@ -34,7 +34,7 @@ def load_model():
     with open('gold_model.pkl', 'rb') as f:
         return pickle.load(f)
 
-# FIXED: Detect market open/close using yfinance data and market hours
+# Detect market open/close using yfinance data and market hours
 def check_market_status(data, data_date):
     """
     Determine if US equity market is currently open using:
@@ -109,7 +109,7 @@ def fetch_market_data():
         
     data = data.rename(columns=ticker_map)
     
-    # FIXED: If today's data is NaN, use most recent available row
+    # If today's data is NaN, use most recent available row
     latest_row = data.iloc[-1]
     data_date = data.index[-1]
     
@@ -122,7 +122,7 @@ def fetch_market_data():
     
     return latest_row, data_date
 
-# FIXED: Fetch last 5 days history for table display
+# Fetch last 5 days history for table display
 @st.cache_data(ttl=300)
 def fetch_last_5_days_history():
     """Fetch last 5 days of market data for table display"""
@@ -259,7 +259,7 @@ with c2:
 
 st.divider()
 
-# FIXED: Last 5 Days Market Data Table
+# Last 5 Days Market Data Table
 with st.container(border=True):
     st.subheader("📊 Last 5 Days Market Data")
     history_data = fetch_last_5_days_history()
